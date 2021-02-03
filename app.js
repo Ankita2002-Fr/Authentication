@@ -7,7 +7,8 @@ const mongoose=require("mongoose");
 const bodyParser=require("body-parser");
 const path=require("path");
 const {check,validationResult}=require("express-validator");
-const encrypt=require("mongoose-encryption");
+const md5=require("md5");
+// const encrypt=require("mongoose-encryption");
 
 const app=express();
 
@@ -75,7 +76,7 @@ const userSchema=new mongoose.Schema({
 
 
 
-userSchema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields:["password","cnfpassword"]});
+// userSchema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields:["password","cnfpassword"]});
 
 const User=new mongoose.model("User",userSchema);
 
@@ -135,8 +136,8 @@ app.post("/register",upload,[
                        Address:req.body.Address,
                        mobNo:req.body.Mobile_no,
                        email:req.body.userEmail,
-                       password:req.body.password,
-                       cnfpassword:req.body.cnfpassword,
+                       password:md5(req.body.password),
+                       cnfpassword:md5(req.body.cnfpassword),
                        resume:req.file.filename
                      });
 
@@ -161,7 +162,7 @@ app.post("/register",upload,[
 app.post("/login",function(req,res){
 
   var userName=req.body.username;
-  var password=req.body.password;
+  var password=md5(req.body.password);
   User.findOne({email:userName},function(err,foundUser){
     if(err)
     {
@@ -171,7 +172,7 @@ app.post("/login",function(req,res){
       {
         if(foundUser.password===password)
         {
-          console.log(foundUser.password);
+        
             res.render("secrets");
         }
         else
